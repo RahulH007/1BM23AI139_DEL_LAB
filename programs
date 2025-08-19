@@ -1,0 +1,709 @@
+#LAB-01
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Existing activation functions
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+def tanh(x):
+    return np.tanh(x)
+
+def relu(x):
+    return np.maximum(0, x)
+
+def leaky_relu(x, alpha=0.01):
+    return np.where(x > 0, x, alpha * x)
+
+def swish(x):
+    return x * sigmoid(x)
+
+def softplus(x):
+    return np.log1p(np.exp(x))  # np.log1p is numerically stable for large x
+
+def elu(x, alpha=1.0):
+    return np.where(x > 0, x, alpha * (np.exp(x) - 1))
+
+# New activation functions
+def linear(x):
+    return x  # No transformation, identity function
+
+def unit_stepwise(x):
+    return np.where(x >= 0, 1, 0)  # 1 for x >= 0, 0 otherwise
+
+def sign(x):
+    return np.sign(x)  # -1 for x < 0, 1 for x >= 0
+
+# Neuron output function (same as before)
+def neuron_output(inputs, weights, bias, activation_func):
+    weighted_sum = np.dot(inputs, weights) + bias
+    return activation_func(weighted_sum)
+
+# Specific inputs, weights, and bias
+inputs = np.array([1.0, -0.5])  # Example input values
+weights = np.array([0.8, -0.3])  # Example weights
+bias = 0.5  # Example bias
+
+# Calculate outputs for all activation functions
+output_sigmoid = neuron_output(inputs, weights, bias, sigmoid)
+output_tanh = neuron_output(inputs, weights, bias, tanh)
+output_relu = neuron_output(inputs, weights, bias, relu)
+output_leaky_relu = neuron_output(inputs, weights, bias, leaky_relu)
+output_swish = neuron_output(inputs, weights, bias, swish)
+output_softplus = neuron_output(inputs, weights, bias, softplus)
+output_elu = neuron_output(inputs, weights, bias, elu)
+output_linear = neuron_output(inputs, weights, bias, linear)
+output_unit_stepwise = neuron_output(inputs, weights, bias, unit_stepwise)
+output_sign = neuron_output(inputs, weights, bias, sign)
+# Print the results
+print(f"Input: {inputs}")
+print(f"Weights: {weights}")
+print(f"Bias: {bias}")
+print(f"Output with Sigmoid Activation: {output_sigmoid}")
+print(f"Output with Tanh Activation: {output_tanh}")
+print(f"Output with ReLU Activation: {output_relu}")
+print(f"Output with Leaky ReLU Activation: {output_leaky_relu}")
+print(f"Output with Swish Activation: {output_swish}")
+print(f"Output with Softplus Activation: {output_softplus}")
+print(f"Output with ELU Activation: {output_elu}")
+print(f"Output with Linear Activation: {output_linear}")
+print(f"Output with Unit Stepwise Activation: {output_unit_stepwise}")
+print(f"Output with Sign Activation: {output_sign}")
+
+# Visualizing all activation functions
+x = np.linspace(-10, 10, 100)
+plt.figure(figsize=(12, 12))
+
+# Sigmoid
+plt.subplot(5, 2, 1)
+plt.plot(x, sigmoid(x), label='Sigmoid', color='blue')
+plt.title('Sigmoid Activation Function')
+plt.grid(True)
+
+# Tanh
+plt.subplot(5, 2, 2)
+plt.plot(x, tanh(x), label='Tanh', color='green')
+plt.title('Tanh Activation Function')
+plt.grid(True)
+
+# ReLU
+plt.subplot(5, 2, 3)
+plt.plot(x, relu(x), label='ReLU', color='red')
+plt.title('ReLU Activation Function')
+plt.grid(True)
+
+# Leaky ReLU
+plt.subplot(5, 2, 4)
+plt.plot(x, leaky_relu(x), label='Leaky ReLU', color='purple')
+plt.title('Leaky ReLU Activation Function')
+plt.grid(True)
+
+# Swish
+plt.subplot(5, 2, 5)
+plt.plot(x, swish(x), label='Swish', color='orange')
+plt.title('Swish Activation Function')
+plt.grid(True)
+
+# Softplus
+plt.subplot(5, 2, 6)
+plt.plot(x, softplus(x), label='Softplus', color='cyan')
+plt.title('Softplus Activation Function')
+plt.grid(True)
+
+# ELU
+plt.subplot(5, 2, 7)
+plt.plot(x, elu(x), label='ELU', color='brown')
+plt.title('ELU Activation Function')
+plt.grid(True)
+
+# Linear
+plt.subplot(5, 2, 8)
+plt.plot(x, linear(x), label='Linear', color='pink')
+plt.title('Linear Activation Function')
+plt.grid(True)
+
+# Unit Stepwise
+plt.subplot(5, 2, 9)
+plt.plot(x, unit_stepwise(x), label='Unit Stepwise', color='yellow')
+plt.title('Unit Stepwise Activation Function')
+plt.grid(True)
+
+# Sign
+plt.subplot(5, 2, 10)
+plt.plot(x, sign(x), label='Sign', color='gray')
+plt.title('Sign Activation Function')
+plt.grid(True)
+
+plt.tight_layout()
+plt.show()
+
+#LAB-02
+import numpy as np
+
+class Perceptron:
+    def __init__(self, learning_rate=0.01, epochs=100):
+        self.learning_rate = learning_rate
+        self.epochs = epochs
+
+    def fit(self, X, y):
+        # Initialize weights and bias
+        self.weights = np.zeros(X.shape[1])
+        self.bias = 0.0
+
+        # Training loop
+        for _ in range(self.epochs):
+            for xi, target in zip(X, y):
+                # Predict and calculate error
+                prediction = self.predict(xi)
+                error = target - prediction
+                # Update weights and bias
+                self.weights += self.learning_rate * error * xi
+                self.bias += self.learning_rate * error
+
+    def predict(self, x):
+        # Compute weighted sum and apply step function
+        return 1 if np.dot(x, self.weights) + self.bias >= 0 else 0
+
+    def evaluate(self, X, y):
+        # Calculate accuracy
+        predictions = [self.predict(xi) for xi in X]
+        accuracy = np.mean(np.array(predictions) == y) * 100
+        return accuracy
+
+# Example usage
+X_train = np.array([[2, 3], [1, 4], [3, 5], [4, 2]])  
+y_train = np.array([0, 0, 1, 1])                     
+
+# Create and train the perceptron
+perceptron = Perceptron(learning_rate=0.01, epochs=100)
+perceptron.fit(X_train, y_train)
+
+# Print weights, bias, and accuracy
+print(f"Updated Weights: {perceptron.weights}")
+print(f"Updated Bias: {perceptron.bias}")
+
+# Evaluate accuracy on training data
+accuracy = perceptron.evaluate(X_train, y_train)
+print(f"Training Accuracy: {accuracy:.2f}%")
+
+# Predict for a new data point
+new_data_point = np.array([2, 4])
+prediction = perceptron.predict(new_data_point)
+print(f"Prediction for {new_data_point}: {prediction}")
+
+
+
+
+LAB-03
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+import tensorflow as tf
+import matplotlib.pyplot as plt
+
+# Load and prepare the Iris dataset
+iris = load_iris()
+X, y = iris.data, iris.target
+
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Standardize the features
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Build the neural network model
+model = tf.keras.Sequential([
+    tf.keras.layers.Dense(64, activation='relu', input_shape=(X_train_scaled.shape[1],)),
+    tf.keras.layers.Dense(32, activation='relu'),
+    tf.keras.layers.Dense(16, activation='relu'),
+    tf.keras.layers.Dense(3, activation='softmax') 
+])
+
+# Compile the model
+model.compile(optimizer='adam',
+              loss='sparse_categorical_crossentropy',
+              metrics=['accuracy'])
+
+# Train the model
+history = model.fit(X_train_scaled, y_train, epochs=50, batch_size=32,validation_split=0.2)
+
+# Evaluate the model
+loss, accuracy = model.evaluate(X_test_scaled, y_test)
+print(f'Test Accuracy: {accuracy * 100:.2f}%')
+
+# Plot accuracy
+plt.plot(history.history['accuracy'], label='Train Accuracy')
+plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+plt.title('Model Accuracy')
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy')
+plt.legend()
+plt.show()
+
+# Plot loss
+plt.plot(history.history['loss'], label='Train Loss')
+plt.plot(history.history['val_loss'], label='Validation Loss')
+plt.title('Model Loss')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.legend()
+plt.show()
+
+
+
+
+LAB-04
+import numpy as np
+import matplotlib.pyplot as plt
+import tensorflow as tf
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+
+# Load and preprocess the Iris dataset
+iris = load_iris()
+X = iris.data
+y = iris.target
+
+# One-hot encode target variable
+y_onehot = OneHotEncoder(sparse_output=False).fit_transform(y.reshape(-1, 1))
+
+# Split dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y_onehot, test_size=0.2, random_state=42)
+
+# Standardize features
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Define a simple neural network model
+def create_model():
+    model = tf.keras.Sequential([
+        tf.keras.layers.Dense(64, input_shape=(X_train_scaled.shape[1],), activation='relu'),
+        tf.keras.layers.Dense(32, activation='relu'),
+        tf.keras.layers.Dense(3, activation='softmax')  # 3 output classes for Iris dataset
+    ])
+    return model
+
+# Train with Gradient Descent
+gd_model = create_model()
+gd_model.compile(optimizer=tf.keras.optimizers.SGD(learning_rate=0.01),
+                 loss='categorical_crossentropy',
+                 metrics=['accuracy'])
+
+gd_history = gd_model.fit(X_train_scaled, y_train, epochs=50, batch_size=32,
+                          validation_data=(X_test_scaled, y_test), verbose=0)
+
+# Train with Stochastic Gradient Descent
+sgd_model = create_model()
+sgd_model.compile(optimizer=tf.keras.optimizers.SGD(learning_rate=0.01),
+                  loss='categorical_crossentropy',
+                  metrics=['accuracy'])
+
+sgd_history = sgd_model.fit(X_train_scaled, y_train, epochs=50, batch_size=1,
+                            validation_data=(X_test_scaled, y_test), verbose=0)
+
+# Plot training history for Gradient Descent
+plt.figure(figsize=(10, 6))
+plt.plot(gd_history.history['loss'], label='Train Loss (GD)')
+plt.plot(gd_history.history['val_loss'], label='Validation Loss (GD)')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.legend()
+plt.title('Training and Validation Loss (GD)')
+plt.show()
+
+plt.figure(figsize=(10, 6))
+plt.plot(gd_history.history['accuracy'], label='Train Accuracy (GD)')
+plt.plot(gd_history.history['val_accuracy'], label='Validation Accuracy (GD)')
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy')
+plt.legend()
+plt.title('Training and Validation Accuracy (GD)')
+plt.show()
+
+
+# Plot training history for Stochastic Gradient Descent
+plt.figure(figsize=(10, 6))
+plt.plot(sgd_history.history['loss'], label='Train Loss (SGD)')
+plt.plot(sgd_history.history['val_loss'], label='Validation Loss (SGD)')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.legend()
+plt.title('Training and Validation Loss (SGD)')
+plt.show()
+
+plt.figure(figsize=(10, 6))
+plt.plot(sgd_history.history['accuracy'], label='Train Accuracy (SGD)')
+plt.plot(sgd_history.history['val_accuracy'], label='Validation Accuracy (SGD)')
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy')
+plt.legend()
+plt.title('Training and Validation Accuracy (SGD)')
+plt.show()
+
+
+
+
+LAB-05
+import numpy as np
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.keras.optimizers import Adam
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+
+# Generate synthetic dataset
+X, y = make_classification(n_samples=1000, n_features=20, n_classes=2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Define a neural network model with dropout
+def create_dropout_model(dropout_rate=0.2):
+    model = Sequential([
+        Dense(64, input_shape=(X_train.shape[1],), activation='relu'),
+        Dropout(dropout_rate),
+        Dense(32, activation='relu'),
+        Dropout(dropout_rate),
+        Dense(1, activation='sigmoid')
+    ])
+    return model
+
+# Compile model with Adam optimizer and binary crossentropy loss
+dropout_model = create_dropout_model(dropout_rate=0.2)
+dropout_model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+
+# Train model with dropout
+dropout_history = dropout_model.fit(
+    X_train, y_train, epochs=50, batch_size=32,
+    validation_data=(X_test, y_test), verbose=0
+)
+
+# Define a neural network model with gradient clipping
+def create_gradient_clip_model(clip_norm=1.0):
+    model = Sequential([
+        Dense(64, input_shape=(X_train.shape[1],), activation='relu'),
+        Dense(32, activation='relu'),
+        Dense(1, activation='sigmoid')
+    ])
+    optimizer = Adam(clipnorm=clip_norm)
+    model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
+    return model
+
+# Train model with gradient clipping
+gradient_clip_model = create_gradient_clip_model(clip_norm=1.0)
+gradient_clip_history = gradient_clip_model.fit(
+    X_train, y_train, epochs=50, batch_size=32,
+    validation_data=(X_test, y_test), verbose=0
+)
+
+# Plot training history for models with dropout and gradient clipping
+plt.figure(figsize=(10, 6))
+plt.plot(dropout_history.history['accuracy'], label='Dropout Training Accuracy', linestyle='--')
+plt.plot(dropout_history.history['val_accuracy'], label='Dropout Validation Accuracy')
+plt.plot(gradient_clip_history.history['accuracy'], label='Gradient Clip Training Accuracy', linestyle='--')
+plt.plot(gradient_clip_history.history['val_accuracy'], label='Gradient Clip Validation Accuracy')
+plt.title('Training and Validation Accuracy')
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+import numpy as np
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
+import matplotlib.pyplot as plt  # Added import for matplotlib
+
+# Load MNIST dataset
+mnist = keras.datasets.mnist
+(x_train, y_train), (x_test, y_test) = mnist.load_data()
+
+# Normalize the data to range [0, 1]
+x_train, x_test = x_train / 255.0, x_test / 255.0
+
+# Generate the parity of each label (sum of digits modulo 2)
+y_train_parity = np.array([np.sum(np.array(list(map(int, str(y))))) % 2 for y in y_train])
+y_test_parity = np.array([np.sum(np.array(list(map(int, str(y))))) % 2 for y in y_test])
+
+# Display a few images from the dataset
+plt.figure(figsize=(10, 10))
+for i in range(25):
+    plt.subplot(5, 5, i + 1)
+    plt.xticks([])  # Remove x-axis ticks
+    plt.yticks([])  # Remove y-axis ticks
+    plt.grid(False)  # Remove grid
+    plt.imshow(x_train[i], cmap=plt.cm.binary)  # Display image
+    plt.xlabel(y_train[i])  # Label the image with the corresponding digit
+plt.show()
+
+# Define the model architecture
+inputs = keras.Input(shape=(28, 28))  # Input layer (28x28 images)
+x = layers.Flatten()(inputs)  # Flatten the input images to 1D vector
+x = layers.Dense(128, activation='relu')(x)  # Dense layer with 128 neurons and ReLU activation
+outputs = layers.Dense(10, activation='softmax')(x)  # Output layer for digit classification (10 classes)
+outputs_parity = layers.Dense(1, activation='sigmoid')(x)  # Output layer for parity classification (binary)
+
+# Define the model with two outputs: digit classification and parity classification
+model = keras.Model(inputs=inputs, outputs=[outputs, outputs_parity])
+
+# Compile the model with different loss functions for the two outputs
+model.compile(optimizer='adam',
+              loss=['sparse_categorical_crossentropy', 'binary_crossentropy'],
+              metrics=[['accuracy'], ['accuracy']])
+
+# Set up early stopping to avoid overfitting
+early_stopping = keras.callbacks.EarlyStopping(monitor='val_loss', patience=5,
+                                               restore_best_weights=True)
+
+# Train the model with early stopping and validation split
+history = model.fit(x_train, [y_train, y_train_parity], epochs=20, validation_split=0.2,
+                    callbacks=[early_stopping])
+
+# Find the epoch at which early stopping occurred
+early_stopping_epoch = np.argmin(history.history['val_loss']) + 1
+
+# Print the epoch at which early stopping occurred
+print("\n\nEarly stopping occurred at epoch:", early_stopping_epoch)
+
+# Plot the training and validation loss
+plt.plot(history.history['loss'], label='Training Loss')
+plt.plot(history.history['val_loss'], label='Validation Loss')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.title('Training and Validation Loss')
+
+# Mark the epoch where early stopping occurred
+plt.axvline(x=early_stopping_epoch, color='r', linestyle='--', label='Early Stopping')
+plt.legend()
+plt.show()
+
+
+
+
+LAB-06
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
+from tensorflow.keras.datasets import mnist
+from tensorflow.keras.utils import to_categorical
+import matplotlib.pyplot as plt
+
+# Load and preprocess the MNIST dataset
+(x_train, y_train), (x_test, y_test) = mnist.load_data()
+x_train = x_train.reshape(-1, 28, 28, 1).astype('float32') / 255.0  # Normalize and reshape
+x_test = x_test.reshape(-1, 28, 28, 1).astype('float32') / 255.0    # Normalize and reshape
+y_train = to_categorical(y_train, 10)  # One-hot encode labels
+y_test = to_categorical(y_test, 10)    # One-hot encode labels
+
+# Build the CNN model
+model = Sequential([
+    Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)),
+    MaxPooling2D((2, 2)),
+    Flatten(),
+    Dense(128, activation='relu'),
+    Dense(10, activation='softmax')  # 10 classes for digits 0-9
+])
+
+# Compile the model
+model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+
+# Train the model
+history = model.fit(x_train, y_train, epochs=5, batch_size=128, validation_split=0.2)
+
+# Evaluate the model
+loss, accuracy = model.evaluate(x_test, y_test)
+print(f"Test Accuracy: {accuracy:.2f}")
+
+# Plot training and validation accuracy and loss
+plt.figure(figsize=(12, 5))
+
+# Plot Accuracy
+plt.subplot(1, 2, 1)
+plt.plot(history.history['accuracy'], label='Training Accuracy')
+plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+plt.title('Training and Validation Accuracy')
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy')
+plt.legend()
+
+# Plot Loss
+plt.subplot(1, 2, 2)
+plt.plot(history.history['loss'], label='Training Loss')
+plt.plot(history.history['val_loss'], label='Validation Loss')
+plt.title('Training and Validation Loss')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
+
+plt.tight_layout()
+plt.show()
+
+# Predict a sample digit
+predictions = model.predict(x_test)
+
+# Convert predictions to labels
+predicted_labels = [tf.argmax(prediction).numpy() for prediction in predictions]
+
+# Visualizing the predictions
+plt.figure(figsize=(10, 4))
+num_images = 1
+for i in range(num_images):
+    plt.subplot(1, num_images, i + 1)
+    plt.imshow(x_test[i].reshape(28, 28), cmap='gray')
+    plt.title(f"Predicted: {predicted_labels[i]}, True: {tf.argmax(y_test[i]).numpy()}")
+    plt.axis('off')
+
+plt.show()
+
+
+
+
+LAB-07
+import numpy as np
+import matplotlib.pyplot as plt
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Embedding, SimpleRNN, Dense, Dropout
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras import regularizers
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.datasets import imdb
+
+# Load the IMDB dataset
+max_features = 5000  # Limit to the top 5000 words
+
+# Load the IMDB dataset (already preprocessed)
+(x_train, y_train), (x_test, y_test) = imdb.load_data(num_words=max_features)
+
+# Pad sequences to ensure consistent length
+x_train = pad_sequences(x_train, maxlen=200)  # Limit sequence length to 200
+x_test = pad_sequences(x_test, maxlen=200)
+
+# Build the model
+model = Sequential()
+model.add(Embedding(input_dim=max_features, output_dim=128))
+model.add(SimpleRNN(32, return_sequences=False, kernel_regularizer=regularizers.l2(0.005)))  # Reduced units
+model.add(Dropout(0.5))  # Reduced dropout rate
+model.add(Dense(16, activation='relu', kernel_regularizer=regularizers.l2(0.005)))  # Reduced units
+model.add(Dropout(0.5))  # Reduced dropout rate
+model.add(Dense(1, activation='sigmoid'))  # Output layer for binary classification
+
+# Compile the model
+model.compile(optimizer=Adam(learning_rate=0.0005), loss='binary_crossentropy', metrics=['accuracy'])
+
+# Early stopping to prevent overfitting
+early_stopping = EarlyStopping(monitor='val_loss', patience=2, restore_best_weights=True)
+
+# Train the model
+history = model.fit(x_train, y_train, epochs=3, batch_size=32, validation_data=(x_test, y_test), callbacks=[early_stopping])
+
+# Evaluate the model
+loss, accuracy = model.evaluate(x_test, y_test)
+print(f'Test Accuracy: {accuracy:.4f}')
+
+# Plotting the training and validation accuracy
+plt.figure(figsize=(12, 5))
+
+# Plot training & validation accuracy
+plt.subplot(1, 2, 1)
+plt.plot(history.history['accuracy'], label='Train Accuracy')
+plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+plt.title('Training and Validation Accuracy')
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy')
+plt.legend()
+
+# Plot training & validation loss
+plt.subplot(1, 2, 2)
+plt.plot(history.history['loss'], label='Train Loss')
+plt.plot(history.history['val_loss'], label='Validation Loss')
+plt.title('Training and Validation Loss')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
+
+# Show the plot
+plt.tight_layout()
+plt.show()
+
+
+OR
+
+
+import numpy as np
+import tensorflow as tf
+from tensorflow.keras.datasets import imdb
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Embedding, LSTM, Dense, Dropout
+
+max_features = 10000
+maxlen = 200
+
+(x_train, y_train), (x_test, y_test) = imdb.load_data(num_words=max_features)
+
+word_index = imdb.get_word_index()
+
+index_to_word = {idx: word for word, idx in word_index.items()}
+
+print("IMDb Dataset Sample:")
+for i in range(5):
+  words = [index_to_word.get(idx, '?') for idx in x_train[i]]
+review_text = ' '.join(words)
+
+print("Review", i+1, ":", review_text)
+print("Sentiment:", y_train[i])
+print()
+x_train = pad_sequences(x_train, maxlen=maxlen)
+x_test = pad_sequences(x_test, maxlen=maxlen)
+
+embedding_dim = 50
+model = Sequential()
+
+model.add(Embedding(input_dim=max_features,output_dim=embedding_dim,input_length=maxlen))
+model.add(LSTM(units=64, dropout=0.2, recurrent_dropout=0.2))
+model.add(Dense(units=1, activation='sigmoid'))
+
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+
+history = model.fit(x_train, y_train, epochs=3, batch_size=64, validation_split=0.2)
+
+loss, accuracy = model.evaluate(x_test, y_test)
+print('Test accuracy:', accuracy)
+
+def predict_sentiment(text):
+  word_to_index = imdb.get_word_index()
+  words = text.split()
+  sequence = [word_to_index[word] if word in word_to_index and word_to_index[word] <
+  max_features else 0 for word in words]
+  sequence = pad_sequences([sequence], maxlen=maxlen)
+  prediction = model.predict(sequence)[0][0]
+  return prediction
+
+positive_text = "This movie was fantastic, I loved every moment of it!"
+negative_text = "I couldn't stand this movie, it was terrible."
+print("Positive text sentiment:", predict_sentiment(positive_text))
+print("Negative text sentiment:", predict_sentiment(negative_text))
+import matplotlib.pyplot as plt
+
+plt.plot(history.history['accuracy'], label='Training Accuracy')
+plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+plt.title('Training and Validation Accuracy')
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy')
+plt.legend()
+plt.show()
+
+plt.plot(history.history['loss'], label='Training Loss')
+plt.plot(history.history['val_loss'], label='Validation Loss')
+plt.title('Training and Validation Loss')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.legend()
+plt.show()
